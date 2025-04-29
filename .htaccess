@@ -1,0 +1,11 @@
+# فعال‌سازی URL های تمیز (اختیاری)
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ index.php [QSA,L]
+
+# جلوگیری از دیدن محتویات فولدر
+Options -Indexes
+
+# تعیین نوع پیش‌فرض فایل index
+DirectoryIndex index.php
