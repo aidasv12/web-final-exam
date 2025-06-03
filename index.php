@@ -1,62 +1,55 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سایت من</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-body {
-background: linear-gradient(to right, #c3d9ff, #e0c3fc);
-font-family: 'Tahoma', sans-serif;
- }
-form-container {
- background-color: #ffffffbb;
-padding: 30px;
- border-radius: 15px;
- box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
- margin-top: 40px;
-}    
-h1 {
-color: #4b0082;
- }
- .navbar {
- background-color: #a18cd1 !important;
- }
-.navbar-nav .nav-link {
- color: white !important;
- font-weight: bold;
- }
-    </style>
+<?php
+session_start();
 
-</head>
-<body>
+define('ROOT_PATH', __DIR__);
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light"> <div class="container-fluid">
-<div class="collapse navbar-collapse">
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-<li class="nav-item"><a class="nav-link active" href="index.php">صفحه اصلی</a></li>
-<li class="nav-item"><a class="nav-link" href="infs.php">مشاهده اطلاعات</a></li>
-<li class="nav-item"><a class="nav-link" href="contact-us.php">تماس با ما</a></li>
-</ul>
-</div>
-</div>
-</nav>
+require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/helper/functions.php';
 
-<div class="container mt-4">
-<h1>ارسال اطلاعات</h1>
-<form action="process-form.php" method="POST">
-<div class="mb-3">
-<label for="name" class="form-label">نام</label>
-<input type="text" class="form-control" name="name" id="name">
-</div>
-<div class="mb-3">
-<label for="last_name" class="form-label">نام خانوادگی</label>
-<input type="text" class="form-control" name="last_name" id="last_name">
-</div>
-<button type="submit" class="btn btn-primary">ارسال</button>
-</form>
-</div>
+use Illuminate\Database\Capsule\Manager as Capsule;
+use App\Route;
+use App\Controller\FrontController;
+use App\Controller\AuthController;
+use App\Controller\DashboardController;
+use App\Controller\PostController;
 
-</body>
-</html>
+// تنظیمات دیتابیس
+$config = require __DIR__ . '/config/database.php';
+
+$capsule = new Capsule;
+$capsule->addConnection($config);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+
+// ایجاد نمونه روتر
+$route = new Route();
+
+// تنظیم نام فولدر پروژه در کلاس Route
+// فرض کن فولدر پروژه webprogramming3 هست
+// پس مسیرها رو بدون این پیشوند تعریف می‌کنیم
+
+// مسیرهای عمومی
+$route->addRoute("GET", "/", [FrontController::class, 'home']);
+$route->addRoute("GET", "/about", [FrontController::class, 'about']);
+$route->addRoute("GET", "/infs", [FrontController::class, 'infs']);
+
+// مسیرهای ثبت نام و ورود
+$route->addRoute("GET", "/register", [AuthController::class, 'register']);
+$route->addRoute("POST", "/register", [AuthController::class, 'storeuser']);
+$route->addRoute("GET", "/login", [AuthController::class, 'login']);
+$route->addRoute("POST", "/login", [AuthController::class, 'loginuser']);
+$route->addRoute("GET", "/dashboard", [DashboardController::class, 'index']);
+
+// مسیرهای مربوط به پست‌ها
+$route->addRoute("GET", "/post", [PostController::class, 'index']);
+$route->addRoute("GET", "/post/create", [PostController::class, 'create']);
+$route->addRoute("POST", "/post/store", [PostController::class, 'store']);
+$route->addRoute("GET", "/post/show", [PostController::class, 'show']);
+$route->addRoute("GET", "/post/edit", [PostController::class, 'edit']);
+$route->addRoute("POST", "/post/update", [PostController::class, 'update']);
+$route->addRoute("POST", "/post/delete", [PostController::class, 'destroy']);
+$route->addRoute("GET", "/logout", [AuthController::class, 'logout']);
+
+
+// فراخوانی dispatch برای پردازش درخواست‌ها
+$route->dispatch();
