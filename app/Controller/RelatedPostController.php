@@ -7,16 +7,15 @@ use App\Model\RelatedPost;
 class RelatedPostController {
 
     // تولید روابط تصادفی بین پست‌ها
-    public  function generateRandomRelations() {
+    public function generateRandomRelations() {
         $posts = Post::all();
 
-        // اول پاک می‌کنیم روابط قبلی رو
+        // حذف روابط قبلی
         RelatedPost::truncate();
 
         foreach ($posts as $post) {
             // تعداد روابط تصادفی بین 1 تا 3 برای هر پست
             $count = rand(1, 3);
-
             $relatedIds = [];
 
             while (count($relatedIds) < $count) {
@@ -34,15 +33,12 @@ class RelatedPostController {
             }
         }
 
-        // بعد از تولید، میتونی redirect یا پیام موفقیت بدی
         return "Related posts generated successfully.";
     }
-    public function index()
-{
-    $relations = \App\Model\RelatedPost::with(['post1', 'post2'])->get();
-    view('related_posts/index.php', ['relations' => $relations]);
-}
 
- 
-
+    // نمایش لیست روابط پست‌ها
+    public function index() {
+        $relations = RelatedPost::with(['post1', 'post2'])->get();
+        return view('related_posts/index.php', ['relations' => $relations]);
+    }
 }
