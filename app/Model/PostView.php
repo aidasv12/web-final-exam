@@ -11,11 +11,10 @@ class PostView extends Model
     protected $fillable = [
         'post_id',
         'user_id',
-        'viewed_at',
-       
+        'views',
     ];
 
-    public $timestamps = false; // چون از created_at استفاده نمی‌کنیم
+    public $timestamps = false;
 
     public function post()
     {
