@@ -1,4 +1,9 @@
+
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 
 define('ROOT_PATH', __DIR__);
@@ -12,6 +17,9 @@ use App\Controller\FrontController;
 use App\Controller\AuthController;
 use App\Controller\DashboardController;
 use App\Controller\PostController;
+use App\Controller\RelatedPostController;
+use App\Controller\PostViewController;
+use App\Controller\RankingController;
 
 // تنظیمات دیتابیس
 $config = require __DIR__ . '/config/database.php';
@@ -22,34 +30,38 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
 // ایجاد نمونه روتر
-$route = new Route();
-
-// تنظیم نام فولدر پروژه در کلاس Route
-// فرض کن فولدر پروژه webprogramming3 هست
-// پس مسیرها رو بدون این پیشوند تعریف می‌کنیم
+$router = new Route(); // 👈 اینجا فقط از $router استفاده می‌کنیم
 
 // مسیرهای عمومی
-$route->addRoute("GET", "/", [FrontController::class, 'home']);
-$route->addRoute("GET", "/about", [FrontController::class, 'about']);
-$route->addRoute("GET", "/infs", [FrontController::class, 'infs']);
+$router->addRoute("GET", "/", [FrontController::class, 'home']);
+$router->addRoute("GET", "/about", [FrontController::class, 'about']);
+$router->addRoute("GET", "/infs", [FrontController::class, 'infs']);
 
-// مسیرهای ثبت نام و ورود
-$route->addRoute("GET", "/register", [AuthController::class, 'register']);
-$route->addRoute("POST", "/register", [AuthController::class, 'storeuser']);
-$route->addRoute("GET", "/login", [AuthController::class, 'login']);
-$route->addRoute("POST", "/login", [AuthController::class, 'loginuser']);
-$route->addRoute("GET", "/dashboard", [DashboardController::class, 'index']);
+// مسیرهای ثبت‌نام و ورود
+$router->addRoute("GET", "/register", [AuthController::class, 'register']);
+$router->addRoute("POST", "/register", [AuthController::class, 'storeuser']);
+$router->addRoute("GET", "/login", [AuthController::class, 'login']);
+$router->addRoute("POST", "/login", [AuthController::class, 'loginuser']);
+$router->addRoute("GET", "/dashboard", [DashboardController::class, 'index']);
+$router->addRoute("GET", "/logout", [AuthController::class, 'logout']);
 
-// مسیرهای مربوط به پست‌ها
-$route->addRoute("GET", "/post", [PostController::class, 'index']);
-$route->addRoute("GET", "/post/create", [PostController::class, 'create']);
-$route->addRoute("POST", "/post/store", [PostController::class, 'store']);
-$route->addRoute("GET", "/post/show", [PostController::class, 'show']);
-$route->addRoute("GET", "/post/edit", [PostController::class, 'edit']);
-$route->addRoute("POST", "/post/update", [PostController::class, 'update']);
-$route->addRoute("POST", "/post/delete", [PostController::class, 'destroy']);
-$route->addRoute("GET", "/logout", [AuthController::class, 'logout']);
+// مسیرهای پست‌ها
+$router->addRoute("GET", "/post", [PostController::class, 'index']);
+$router->addRoute("GET", "/post/create", [PostController::class, 'create']);
+$router->addRoute("POST", "/post/store", [PostController::class, 'store']);
+$router->addRoute("GET", "/post/show", [PostController::class, 'show']);
+$router->addRoute("GET", "/post/edit", [PostController::class, 'edit']);
+$router->addRoute("POST", "/post/update", [PostController::class, 'update']);
+$router->addRoute("POST", "/post/delete", [PostController::class, 'destroy']);
+
+// مسیرهای دیگر
+$router->addRoute('GET', '/related-posts/generate', [RelatedPostController::class, 'generateRandomRelations']);
+$router->addRoute('GET', '/post-views/generate', [PostViewController::class, 'generateRandomViews']);
+$router->addRoute("GET", "/post-views", [PostViewController::class, 'index']);
+$router->addRoute("GET", "/related-posts", [RelatedPostController::class, 'index']);
+$router->addRoute('GET', '/ranking', [RankingController::class, 'showRanking']);
 
 
-// فراخوانی dispatch برای پردازش درخواست‌ها
-$route->dispatch();
+// اجرای روتینگ
+$router->dispatch();
+
